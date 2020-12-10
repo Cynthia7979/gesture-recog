@@ -2,28 +2,19 @@ import torch
 import torch.nn as tnn
 import torchvision.datasets as dsets
 import torchvision.transforms as transforms
-# import torch.utils.data.Dataset as Dataset
-
-torch.cuda.set_device(1)
 
 BATCH_SIZE = 10
 LEARNING_RATE = 0.5
-EPOCH = 150 
+EPOCH = 3000
 N_CLASSES = 3
 
 transform = transforms.Compose([
-    transforms.RandomResizedCrop(246),
-    transforms.Grayscale(num_output_channels=1),
+    transforms.RandomResizedCrop(224),
     transforms.RandomHorizontalFlip(),
     transforms.ToTensor(),
     transforms.Normalize(mean = [ 0.485, 0.456, 0.406 ],
                          std  = [ 0.229, 0.224, 0.225 ]),
     ])
-print('Transform defined')
-
-# class GesturesDataset(Dataset):  # Datasets approach
-#
-
 
 trainData = dsets.ImageFolder('~/data/train', transform)
 testData = dsets.ImageFolder('~/data/test', transform)
@@ -57,7 +48,7 @@ class VGG16(tnn.Module):
     def __init__(self, n_classes=1000):
         super(VGG16, self).__init__()
 
-        self.layer0 = vgg_conv_block([1,3], [3,3], [3,3], [1,1], 2, 2)
+        # Conv blocks (BatchNorm + ReLU activation added in each block)
         self.layer1 = vgg_conv_block([3,64], [64,64], [3,3], [1,1], 2, 2)
         self.layer2 = vgg_conv_block([64,128], [128,128], [3,3], [1,1], 2, 2)
         self.layer3 = vgg_conv_block([128,256,256], [256,256,256], [3,3,3], [1,1,1], 2, 2)
@@ -70,10 +61,8 @@ class VGG16(tnn.Module):
 
         # Final layer
         self.layer8 = tnn.Linear(4096, n_classes)
-        print('Module inited')
 
     def forward(self, x):
-        out = self.layer0(x)
         out = self.layer1(x)
         out = self.layer2(out)
         out = self.layer3(out)
@@ -95,18 +84,18 @@ cost = tnn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(vgg16.parameters(), lr=LEARNING_RATE)
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
 
-lastepoch = 0
-print('Setting up training...')
-
 # Train the model
 for epoch in range(EPOCH):
     avg_loss = 0
     cnt = 0
-    if 30 == lastepoch and 0.00001 < LEARNING_RATE:
-        LEARNING_RATE /= 2
+    if 30 == epoch:
+        LEARNING_RATE = 0.01
         optimizer = torch.optim.Adam(vgg16.parameters(), lr=LEARNING_RATE)
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
-        lastepoch = 0
+    if 70 == epoch:
+        LEARNING_RATE = 0.002
+        optimizer = torch.optim.Adam(vgg16.parameters(), lr=LEARNING_RATE)
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
     for images, labels in trainLoader:
         images = images.cuda()
         labels = labels.cuda()
@@ -130,7 +119,6 @@ for epoch in range(EPOCH):
 vgg16.eval()
 correct = 0
 total = 0
-print('Setting up testing...')
 
 for images, labels in testLoader:
     images = images.cuda()
