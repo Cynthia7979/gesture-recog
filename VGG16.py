@@ -2,20 +2,24 @@ import torch
 import torch.nn as tnn
 import torchvision.datasets as dsets
 import torchvision.transforms as transforms
+from torchtoolbox.transform import Cutout
 
 BATCH_SIZE = 10
 LEARNING_RATE = 0.5
-EPOCH = 3000
+EPOCH = 6000
 N_CLASSES = 3
 
 transform = transforms.Compose([
     transforms.RandomResizedCrop(224),
     transforms.RandomHorizontalFlip(),
+    Cutout(0.25),
     transforms.ToTensor(),
     transforms.Normalize(mean = [ 0.485, 0.456, 0.406 ],
                          std  = [ 0.229, 0.224, 0.225 ]),
     ])
 
+# trainData = dsets.ImageFolder('~/grayscale_dataset/train', transform)
+# testData = dsets.ImageFolder('~/grayscale_dataset/test', transform)
 trainData = dsets.ImageFolder('~/data/train', transform)
 testData = dsets.ImageFolder('~/data/test', transform)
 
@@ -113,7 +117,6 @@ for epoch in range(EPOCH):
     # save the model
     if 0 == epoch % 10:
         torch.save(vgg16.state_dict(), 'cnn.pkl')
-    lastepoch += 1
 
 # Test the model
 vgg16.eval()
