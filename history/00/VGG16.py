@@ -5,7 +5,7 @@ import torchvision.transforms as transforms
 
 BATCH_SIZE = 10
 LEARNING_RATE = 0.01
-EPOCH = 100
+EPOCH = 300
 N_CLASSES = 3
 
 transform = transforms.Compose([
@@ -97,6 +97,7 @@ for epoch in range(EPOCH):
         LEARNING_RATE = 0.005
         optimizer = torch.optim.Adam(vgg16.parameters(), lr=LEARNING_RATE)
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
+
     for images, labels in trainLoader:
         images = images.cuda()
         labels = labels.cuda()
@@ -131,5 +132,3 @@ for images, labels in testLoader:
 
 # Save the Trained Model
 torch.save(vgg16.state_dict(), 'cnn.pkl')
-torch.save(vgg16, 'model.pkl')
-
