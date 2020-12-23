@@ -6,13 +6,13 @@ from torchtoolbox.transform import Cutout
 
 BATCH_SIZE = 10
 LEARNING_RATE = 0.5
-EPOCH = 6000
+EPOCH = 300
 N_CLASSES = 3
 
 transform = transforms.Compose([
     transforms.RandomResizedCrop(224),
     transforms.RandomHorizontalFlip(),
-    Cutout(0.25),
+    # Cutout(0.25),
     transforms.ToTensor(),
     transforms.Normalize(mean = [ 0.485, 0.456, 0.406 ],
                          std  = [ 0.229, 0.224, 0.225 ]),
