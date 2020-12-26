@@ -2,10 +2,12 @@
 
 This file clarifies the standard of the model's runtime output.
 
-    For making a visual report, we need to plot a diagram about the change of
-loss per epoch. There are many ways drawing the diagram, but a standard could
-let us to have the ability to use various ways to implement the plotting, which
-could give a good interface.  
+  For making a visual report, we need to plot a diagram about the change of loss
+per epoch. There are many ways drawing the diagram, but a standard could let us
+to have the ability to use various ways to implement the plotting, which could
+give a good interface.  
+
+
 
 ---
 
