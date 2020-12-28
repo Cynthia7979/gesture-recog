@@ -30,15 +30,15 @@ class gesture(tnn.model):
 
         # Conv blocks (1 block: Conv2d + BatchNorm + ReLU)
         self.layer1 = gesture_conv_block(1, 16, 3, 0, 3, 3)   # (1*137*137) --Conv2d--> (16*135*135) --MaxPool2d--> (16*45*45)
-        self.layer2 = gesture_conv_block(16, 64, 3, 1, 3, 3)  # (16*45*45) --Conv2d--> (64*45*45) --MaxPool2d--> (64*15*15)
-        self.layer3 = gesture_conv_block(64, 512, 3, 1, 3, 3) # (64*15*15) --Conv2d--> (512*15*15) --MaxPool2d--> (512*5*5)
+        self.layer2 = gesture_conv_block(16, 32, 3, 1, 3, 3)  # (16*45*45) --Conv2d--> (32*45*45) --MaxPool2d--> (32*15*15)
+        self.layer3 = gesture_conv_block(32, 128, 3, 1, 3, 3) # (32*15*15) --Conv2d--> (128*15*15) --MaxPool2d--> (128*5*5)
 
         # FC layers (1 layer: Linear + BatchNorm + ReLU)
-        self.layer4 = gesture_fc_layer(5*5*512, 4096)
-        self.layer5 = gesture_fc_layer(4096, 4096)
+        self.layer4 = gesture_fc_layer(5*5*128, 2048)
+        self.layer5 = gesture_fc_layer(2048,1024)
 
         # Final layer
-        self.layer6 = tnn.Linear(4096, nclasses)
+        self.layer6 = tnn.Linear(1024, nclasses)
 
 def forward(x):
         # Conv layers
