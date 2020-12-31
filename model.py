@@ -24,7 +24,7 @@ def gesture_conv_block(conv_in, conv_out, conv_ksize, conv_psize, pool_ksize, po
              + [ tnn.MaxPool2d(kernel_size = pool_ksize, stride = pool_stride) ]
     return tnn.Sequential(*layers)
 
-class gesture(tnn.Model):
+class gesture(tnn.Module):
     def __init__(self, nclasses=3):
         super(gesture, self).__init__()
 
