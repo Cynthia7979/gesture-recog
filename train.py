@@ -64,6 +64,7 @@ for epoch in range(EPOCH):
         loss_list += loss       # store all loss
         avg_loss += loss.data   # get avg loss
         cnt += 1
+        print("[E: %d] loss: %f, avg_loss: %f" % (epoch, loss.data, avg_loss/cnt))
         # Backward + Optimize
         loss.backward()
         optimizer.step()
