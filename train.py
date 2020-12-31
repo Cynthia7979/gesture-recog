@@ -3,7 +3,7 @@ import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 import numpy
 import os
-import gesture from model as gmodel
+import model.gesture as gmodel
 
 # define
 BATCH_SIZE = 10
