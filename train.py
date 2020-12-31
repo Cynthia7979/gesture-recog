@@ -80,6 +80,7 @@ for epoch in range(EPOCH):
     if 0 == epoch % 30:
         torch.save(model.state_dict(), 'cnn.pkl')
 
+torch.save(model.state_dict(), 'cnn.pkl')
 
 def getStat(train_data):
     '''
