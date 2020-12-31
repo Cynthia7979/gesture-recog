@@ -1,22 +1,22 @@
 import torch
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
-import numpy
-import os
-import model.gesture as gmodel
+from model import gesture as gmodel
+from utils import getStat
+from utils import save_loss_values
 
 # define
 BATCH_SIZE = 10
 LEARNING_RATE = 0.01
-EPOCH = 500
+EPOCH = 700
 N_CLASSES = 3
 
 # get the mean and std
 trans_getstat = transforms.Compose([
     transforms.RandomResizedCrop(137),
-    transforms.GrayScale()
+    transforms.Grayscale()
     ])
-stat_data = ImageFolder(root=r'~/data', transform=trans_getstat)
+stat_data = datasets.ImageFolder('~/data/train')#, transform=trans_getstat)
 stat_mean, stat_std = getStat(stat_data)
 del stat_data
 
@@ -25,7 +25,7 @@ transform = transforms.Compose([
     transforms.RandomResizedCrop(137),
     transforms.RandomHorizontalFlip(),
     transforms.RandomRotation(360),
-    transforms.GrayScale(),
+    transforms.Grayscale(),
     transforms.ToTensor(),
     transforms.Normalize(mean = [stat_mean],
                          std  = [stat_std]),
@@ -81,31 +81,4 @@ for epoch in range(EPOCH):
         torch.save(model.state_dict(), 'cnn.pkl')
 
 torch.save(model.state_dict(), 'cnn.pkl')
-
-def getStat(train_data):
-    '''
-    Compute mean and variance for training data
-    :param train_data: 自定义类Dataset(或ImageFolder即可)
-    :return: (mean, std)
-    '''
-    print('Compute mean and variance for training data.')
-    print(len(train_data))
-    train_loader = torch.utils.data.DataLoader(
-        train_data, batch_size=1, shuffle=False, num_workers=0,
-        pin_memory=True)
-    mean = torch.zeros(1)
-    std = torch.zeros(1)
-    for X, _ in train_loader:
-        mean[0] += X.mean()
-        std[0] += X.std()
-    mean.div_(len(train_data))
-    std.div_(len(train_data))
-    return list(mean.numpy()), list(std.numpy())
-
-def save_loss_values(directory:str, epoch:int, all_loss:list):
-    with open(directory + str(epoch) + "_all", "w") as fp:
-        for i in all_loss:
-            fp.write(str(i) + '\n')
-        fp.flush()
-    return
 
