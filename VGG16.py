@@ -4,27 +4,12 @@ import torchvision.datasets as dsets
 import torchvision.transforms as transforms
 import time
 from torchtoolbox.transform import Cutout
+from torchvision.utils import save_image
 
 BATCH_SIZE = 10
 LEARNING_RATE = 0.5
-EPOCH = 5
+EPOCH = 1000
 N_CLASSES = 3
-
-def save_image_tensor(image, filename=str(time.time())+'.jpg'):
-    """
-    将tensor保存为图片
-    :param input_tensor: 要保存的tensor
-    :param filename: 保存的文件名
-    """
-    assert (len(input_tensor.shape) == 4 and input_tensor.shape[0] == 1)
-    # 复制一份
-    input_tensor = image.clone().detach()
-    # 到cpu
-    input_tensor = input_tensor.to(torch.device('cpu'))
-    # 反归一化
-    # input_tensor = unnormalize(input_tensor)
-    vutils.save_image(input_tensor, filename)
-    return input_tensor
 
 transform = transforms.Compose([
     transforms.RandomResizedCrop(224),
@@ -39,6 +24,8 @@ transform = transforms.Compose([
 # testData = dsets.ImageFolder('~/grayscale_dataset/test', transform)
 trainData = dsets.ImageFolder('~/data/train', transform)
 testData = dsets.ImageFolder('~/data/test', transform)
+# trainData = dsets.ImageFolder('~/data/train')
+# testData = dsets.ImageFodler('~/data/test')
 
 trainLoader = torch.utils.data.DataLoader(dataset=trainData, batch_size=BATCH_SIZE, shuffle=True)
 testLoader = torch.utils.data.DataLoader(dataset=testData, batch_size=BATCH_SIZE, shuffle=False)
@@ -120,8 +107,9 @@ for epoch in range(EPOCH):
     for images, labels in trainLoader:
         images = images.cuda()
         labels = labels.cuda()
-        print(images)
-        save_image_tensor(images)
+        for i in range(len(images)):
+            print(images[i], labels[i])
+            save_image(images[i], f'{labels[i]}_{time.time()}.jpg')
 
         # Forward + Backward + Optimize
         optimizer.zero_grad()
