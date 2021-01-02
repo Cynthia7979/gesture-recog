@@ -1,4 +1,5 @@
 import torch
+import torch.nn as tnn
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 from model import gesture as gmodel
@@ -13,6 +14,10 @@ N_CLASSES = 3
 # from https://discuss.pytorch.org/t/solved-how-do-i-display-a-grayscale-image/35653
 stat_mean = 0.1307
 stat_std = 0.3081
+
+# use gpu1
+import os
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 '''
 # get the mean and std
@@ -32,8 +37,8 @@ transform = transforms.Compose([
     transforms.RandomRotation(360),
     transforms.Grayscale(),
     transforms.ToTensor(),
-    transforms.Normalize(mean = stat_mean,
-                         std  = stat_std),
+    transforms.Normalize((stat_mean,),
+                         (stat_std,)),
     ])
 
 # data
@@ -53,7 +58,7 @@ print('done\n')
 # Loss, Optimizer & Scheduler
 print('initializing...')
 cost = tnn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(vgg16.parameters(), lr=LEARNING_RATE)
+optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
 print('done\n')
 
@@ -73,10 +78,10 @@ for epoch in range(EPOCH):
         _, outputs = model(images)
         # Calculate loss
         loss = cost(outputs, labels)
-        loss_list += loss       # store all loss
+        loss_list += [loss.data]    # store all loss
         avg_loss += loss.data   # get avg loss
-        cnt += 1
-        print("[E: %d] loss: %f, avg_loss: %f" % (epoch, loss.data, avg_loss/cnt))
+        count += 1
+        print("[E: %d] loss: %f, avg_loss: %f" % (epoch, loss.data, avg_loss/count))
         # Backward + Optimize
         loss.backward()
         optimizer.step()
@@ -87,7 +92,7 @@ for epoch in range(EPOCH):
     os.mkdir("visual-loss")
     save_loss_values("visual-loss", epoch, loss_list)
     with open("visual-loss/" + str(epoch) + "_avg", "w") as fp:
-        fp.write(str(avg_loss / cnt))
+        fp.write(str(avg_loss / count))
 
     # auto save the model
     if 0 == epoch % 30:
