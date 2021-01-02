@@ -1,13 +1,19 @@
 import torch
+import torchvision.transforms as transforms
+import torchvision.datasets as datasets
 import numpy
 import os
 
+'''
 def getStat(datafolder:str, trans=transforms.ToTensor()):
     traindata = datasets.ImageFolder(datafolder, trans)
-    image_means = torch.stack([t.mean(1).mean(1) for t, c in traindata])
+    trainLoader = torch.utils.data.DataLoader(dataset=traindata) 
+    image_means = torch.stack([t.mean(1).mean(1) for t, c in trainLoader])
     image_means.mean(0)
     return image_means
-    
+'''
+
+'''    
 def getStat(train_data):
     print('Compute mean and variance for training data.')
     print(len(train_data))
@@ -22,6 +28,7 @@ def getStat(train_data):
     mean.div_(len(train_data))
     std.div_(len(train_data))
     return list(mean.numpy()), list(std.numpy())
+'''
 
 def save_loss_values(directory:str, epoch:int, all_loss:list):
     with open(directory + str(epoch) + "_all", "w") as fp:
