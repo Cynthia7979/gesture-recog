@@ -40,19 +40,19 @@ class gesture(tnn.Module):
         # Final layer
         self.layer6 = tnn.Linear(1024, nclasses)
 
-def forward(x):
-        # Conv layers
-        out = self.layer1(x)
-        out = self.layer2(out)
-        gesture_features = self.layer3(out)
-        out = gesture_features.view(out.size(0), -1)
-        
-        # FC layers
-        out = self.layer4(out)
-        out = self.layer5(out)
+    def forward(self, x):
+            # Conv layers
+            out = self.layer1(x)
+            out = self.layer2(out)
+            gesture_features = self.layer3(out)
+            out = gesture_features.view(out.size(0), -1)
+            
+            # FC layers
+            out = self.layer4(out)
+            out = self.layer5(out)
 
-        # Final layer
-        out = self.layer6(out)
+            # Final layer
+            out = self.layer6(out)
 
-        return gesture_features, out
+            return gesture_features, out
     
