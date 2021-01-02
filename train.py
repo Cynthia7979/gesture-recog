@@ -53,14 +53,14 @@ print('constructing the model...')
 model = gmodel()    # n_class = 3
 print('copy to the video card...')
 model.cuda()
-print('done\n')
+print('done')
 
 # Loss, Optimizer & Scheduler
 print('initializing...')
 cost = tnn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
-print('done\n')
+print('done')
 
 print('start training.')
 for epoch in range(EPOCH):
@@ -78,8 +78,8 @@ for epoch in range(EPOCH):
         _, outputs = model(images)
         # Calculate loss
         loss = cost(outputs, labels)
-        loss_list += [loss.data]    # store all loss
-        avg_loss += loss.data   # get avg loss
+        loss_list += [float(loss.data)] # store all loss
+        avg_loss += loss.data           # get avg loss
         count += 1
         print("[E: %d] loss: %f, avg_loss: %f" % (epoch, loss.data, avg_loss/count))
         # Backward + Optimize
@@ -89,13 +89,14 @@ for epoch in range(EPOCH):
     scheduler.step(avg_loss)
     
     # save loss value
-    os.mkdir("visual-loss")
+    if not os.path.exists('visual-loss'):
+        os.mkdir("visual-loss")
     save_loss_values("visual-loss", epoch, loss_list)
     with open("visual-loss/" + str(epoch) + "_avg", "w") as fp:
-        fp.write(str(avg_loss / count))
+        fp.write(str(float(avg_loss / count)))
 
     # auto save the model
-    if 0 == epoch % 30:
+    if 0 == (epoch + 1) % 30:
         torch.save(model.state_dict(), 'cnn.pkl')
 
 torch.save(model.state_dict(), 'cnn.pkl')
