@@ -131,6 +131,9 @@ dmypy.json
 # what is this?
 .nfs000000002e921ff100000002
 
+# cnn model
+*.pkl
+
 # vim swp
 *.swp
 # emacs
