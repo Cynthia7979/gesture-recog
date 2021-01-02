@@ -6,7 +6,7 @@ from utils import save_loss_values
 
 BATCH_SIZE = 10
 LEARNING_RATE = 0.01
-EPOCH = 1000
+EPOCH = 700
 N_CLASSES = 3
 
 transform = transforms.Compose([
@@ -81,11 +81,13 @@ class VGG16(tnn.Module):
 
         return vgg16_features, out
 
-__name__ = "__main__"
-
 # some train
 if "__main__" == __name__:
           
+    # use gpu1
+    import os
+    os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+
     vgg16 = VGG16(n_classes=N_CLASSES)
     vgg16.cuda()
 
@@ -111,8 +113,8 @@ if "__main__" == __name__:
             _, outputs = vgg16(images)
             # Calculate loss
             loss = cost(outputs, labels)
-            loss_list += loss       # store all loss
-            avg_loss += loss.data   # get avg loss
+            loss_list += [float(loss.data)]    # store all loss
+            avg_loss += loss.data       # get avg loss
             cnt += 1
             print("[E: %d] loss: %f, avg_loss: %f" % (epoch, loss.data, avg_loss/cnt))
             # Backward + Optimize
@@ -122,14 +124,15 @@ if "__main__" == __name__:
         scheduler.step(avg_loss)
 
         # save loss value
-        os.mkdir("visual-loss")
+        if not os.path.exists('visual-loss'):
+            os.mkdir("visual-loss")
         save_loss_values("visual-loss", epoch, loss_list)
         with open("visual-loss/" + str(epoch) + "_avg", "w") as fp:
-            fp.write(str(avg_loss / cnt))
+            fp.write(str(float(avg_loss / cnt)))
 
         # save the model
         if 0 == epoch % 30:
-            torch.save(vgg16.state_dict(), 'cnn.pkl')
+            torch.save(vgg16, 'cnn.pkl')
 
     # Test the model
     vgg16.eval()
@@ -146,5 +149,5 @@ if "__main__" == __name__:
         print("avg acc: %f" % (100* correct/total))
 
     # Save the Trained Model
-    torch.save(vgg16.state_dict(), 'cnn.pkl')
+    torch.save(vgg16, 'cnn.pkl')
 
