@@ -5,7 +5,7 @@ def conv_layer(chann_in, chann_out, k_size, p_size):
     layer = tnn.Sequential(
         tnn.Conv2d(chann_in, chann_out, kernel_size=k_size, padding=p_size),
         # activation
-        tnn.BatchNormal2d(chann_out),
+        tnn.BatchNorm2d(chann_out),
         tnn.ReLU()
     )
     return layer
