@@ -2,7 +2,7 @@ import torch
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 from model import gesture as gmodel
-from utils import getStat
+#from utils import getStat
 from utils import save_loss_values
 
 # define
@@ -10,15 +10,20 @@ BATCH_SIZE = 10
 LEARNING_RATE = 0.01
 EPOCH = 700
 N_CLASSES = 3
+# from https://discuss.pytorch.org/t/solved-how-do-i-display-a-grayscale-image/35653
+stat_mean = 0.1307
+stat_std = 0.3081
 
+'''
 # get the mean and std
 trans_getstat = transforms.Compose([
     transforms.RandomResizedCrop(137),
     transforms.Grayscale()
     ])
-stat_data = datasets.ImageFolder('~/data/train')#, transform=trans_getstat)
-stat_mean, stat_std = getStat(stat_data)
+#stat_data = datasets.ImageFolder('~/data/train')#, transform=trans_getstat)
+stat_mean, stat_std = getStat('~/data/train', trans_getstat)
 del stat_data
+'''
 
 # load the data
 transform = transforms.Compose([
@@ -27,8 +32,8 @@ transform = transforms.Compose([
     transforms.RandomRotation(360),
     transforms.Grayscale(),
     transforms.ToTensor(),
-    transforms.Normalize(mean = [stat_mean],
-                         std  = [stat_std]),
+    transforms.Normalize(mean = stat_mean,
+                         std  = stat_std),
     ])
 
 # data
@@ -38,14 +43,21 @@ trainLoader = torch.utils.data.DataLoader(dataset=trainData, batch_size=BATCH_SI
 testLoader = torch.utils.data.DataLoader(dataset=testData, batch_size=BATCH_SIZE, shuffle=False)
 
 # starts training 
+print('start...')
+print('constructing the model...')
 model = gmodel()    # n_class = 3
+print('copy to the video card...')
 model.cuda()
+print('done\n')
 
 # Loss, Optimizer & Scheduler
+print('initializing...')
 cost = tnn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(vgg16.parameters(), lr=LEARNING_RATE)
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
+print('done\n')
 
+print('start training.')
 for epoch in range(EPOCH):
     avg_loss = 0
     count = 0
