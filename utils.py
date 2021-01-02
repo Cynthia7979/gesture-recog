@@ -37,3 +37,6 @@ def save_loss_values(directory:str, epoch:int, all_loss:list):
         fp.flush()
     return
 
+#def save_acc_values(directory:str
+
+
