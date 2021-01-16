@@ -1,0 +1,5 @@
+{
+    "python.pythonPath": "/home/user/.conda/envs/ai/bin/python",
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true
+}
