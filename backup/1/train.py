@@ -11,9 +11,7 @@ N_CLASSES = 3
 transform = transforms.Compose([
     transforms.RandomResizedCrop(224),
     transforms.RandomHorizontalFlip(),
-    transforms.RandomVerticalFlip(),
-    transforms.RandomRotation((-180, 180)),
-    transforms.RandomGrayscale(),
+    transforms.RandomRotation(360),
     transforms.ColorJitter(),
     transforms.ToTensor(),
 #    transforms.Normalize(mean = [0.449],

@@ -133,6 +133,7 @@ dmypy.json
 
 # cnn model
 *.pkl
+*.pt
 
 # vim swp
 *.swp
