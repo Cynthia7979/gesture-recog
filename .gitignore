@@ -132,10 +132,11 @@ dmypy.json
 .nfs000000002e921ff100000002
 
 # cnn model
-*.pkl
+.pkl
+.pt    # torch script
 
 # vim swp
-*.swp
+.swp
 # emacs
 *~
 \#*\#
