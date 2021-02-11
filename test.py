@@ -1,9 +1,14 @@
 import torch
-from normal import VGG16
+from train import VGG16
+from train import testLoader
 
 if "__main__" == __name__:
+    # use gpu1
+    import os
+    os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+
     vgg16 = VGG16(n_classes=3)
-    vgg16.load(state_dict("cnn.pkl"))
+    vgg16.load_state_dict(torch.load("cnn.pkl"))
     vgg16.cuda()
     # Test the model
     vgg16.eval()

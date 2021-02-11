@@ -2,28 +2,36 @@ import torch
 import torch.nn as tnn
 import torchvision.datasets as dsets
 import torchvision.transforms as transforms
+from pytorchtools import EarlyStopping
 
 BATCH_SIZE = 10
 LEARNING_RATE = 0.01
-EPOCH = 800
+EPOCH = 250
 N_CLASSES = 3
+PATIENCE = 20
 
+# ref: https://blog.csdn.net/batmanchen/article/details/109897788
 transform = transforms.Compose([
     transforms.RandomResizedCrop(224),
     transforms.RandomHorizontalFlip(),
-    transforms.RandomVerticalFlip(),
-    transforms.RandomRotation((-180, 180)),
-    transforms.RandomGrayscale(),
+    transforms.RandomRotation(360),
+    transforms.RandomAffine(360),
     transforms.ColorJitter(),
     transforms.ToTensor(),
-#    transforms.Normalize(mean = [0.449],
-#                         std  = [0.226])
+    transforms.RandomErasing(p=0.8, value='vgg16'),
+    transforms.Normalize(mean = [ 0.485, 0.456, 0.406 ],
+                         std  = [ 0.229, 0.224, 0.225 ]),
+    ])
+
+testTransform = transforms.Compose([
+    transforms.CenterCrop(224),
+    transforms.ToTensor(),
     transforms.Normalize(mean = [ 0.485, 0.456, 0.406 ],
                          std  = [ 0.229, 0.224, 0.225 ]),
     ])
 
 trainData = dsets.ImageFolder('/mnt/data/train', transform)
-testData = dsets.ImageFolder('/mnt/data/test', transform)
+testData = dsets.ImageFolder('/mnt/data/test', testTransform)
 
 trainLoader = torch.utils.data.DataLoader(dataset=trainData, batch_size=BATCH_SIZE, shuffle=True)
 testLoader = torch.utils.data.DataLoader(dataset=testData, batch_size=BATCH_SIZE, shuffle=False)
@@ -74,8 +82,6 @@ class VGG16(tnn.Module):
         self.layer8 = tnn.Linear(4096, n_classes)
 
     def forward(self, x):
-        #out = self.layer0(x)
-        #out = self.layer1(out)
         out = self.layer1(x)
         out = self.layer2(out)
         out = self.layer3(out)
@@ -91,6 +97,17 @@ class VGG16(tnn.Module):
 # some train
 if "__main__" == __name__:
           
+    # use gpu1
+    import os
+    os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+
+    # loss value and acc
+    train_losses = []
+    test_losses = []
+    acc_list = []
+    # early stop
+    early_stop = EarlyStopping(patience=PATIENCE, verbose=True)
+
     vgg16 = VGG16(n_classes=N_CLASSES)
     vgg16.cuda()
 
@@ -102,6 +119,8 @@ if "__main__" == __name__:
     # Train the model
     for epoch in range(EPOCH):
         
+        # train set
+        vgg16.train()
         avg_loss = 0
         cnt = 0
         for images, labels in trainLoader:
@@ -114,14 +133,60 @@ if "__main__" == __name__:
             loss = cost(outputs, labels)
             avg_loss += loss.data
             cnt += 1
-            print("[E: %d] loss: %f, avg_loss: %f" % (epoch, loss.data, avg_loss/cnt))
+            print("[E: %d] \tloss: %f  \tavg_loss: %f" % (epoch, loss.data, avg_loss/cnt))
             loss.backward()
             optimizer.step()
         scheduler.step(avg_loss)
+        train_losses += [avg_loss / cnt]
+
+        # test set
+        vgg16.eval()
+        valid_losses = []
+        # acc
+        correct = 0
+        total = 0
+        # loss
+        avg_loss = 0
+        cnt = 0
+        for images, labels in testLoader:
+            images = images.cuda()
+            _, outputs = vgg16(images)
+            # acc
+            _, predicted = torch.max(outputs.data, 1)
+            total += labels.size(0)
+            correct += (predicted.cpu() == labels).sum()
+            # loss
+            labels = labels.cuda()
+            loss = cost(outputs, labels)
+            valid_losses += [loss.item()]
+            avg_loss += loss.data
+            cnt += 1
+            print("Test losses: %f" % (loss.data))
+        # acc
+        acc_list += [correct / total * 100]
+        # loss
+        test_losses += [avg_loss / cnt]
+        valid_loss = avg_loss / cnt
+        
+        # early stop
+        early_stop(valid_loss, vgg16)
+
         # save the model
         if 0 == epoch % 10:
             torch.save(vgg16.state_dict(), 'cnn.pkl')
             torch.save(vgg16, 'module.pkl')
+
+        if early_stop.early_stop:
+            print("Early stopping at epoch: " + str(epoch))
+            break
+
+    # save output data... (loss values...)
+    with open('train-loss', 'w') as fp:
+        for i in train_losses:
+            fp.write(str(i) + '\n')
+    with open('test-loss', 'w') as fp:
+        for i in test_losses:
+            fp.write(str(i) + '\n')
 
     # Test the model
     vgg16.eval()
