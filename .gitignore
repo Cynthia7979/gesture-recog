@@ -1,7 +1,3 @@
-# Custom
-*.pkl
-nohup.out
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -131,3 +127,19 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# what is this?
+.nfs000000002e921ff100000002
+
+# cnn model
+*.pkl
+*.pt
+
+# vim swp
+*.swp
+# emacs
+*~
+\#*\#
+# VScode
+.vscode/
+
