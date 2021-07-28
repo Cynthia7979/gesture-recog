@@ -10,32 +10,6 @@ EPOCH = 250
 N_CLASSES = 3
 PATIENCE = 20
 
-# ref: https://blog.csdn.net/batmanchen/article/details/109897788
-transform = transforms.Compose([
-    transforms.RandomResizedCrop(224),
-    transforms.RandomHorizontalFlip(),
-    transforms.RandomRotation(360),
-    transforms.RandomAffine(360),
-    transforms.ColorJitter(),
-    transforms.ToTensor(),
-    transforms.RandomErasing(p=0.8, value='vgg16'),
-    transforms.Normalize(mean = [ 0.485, 0.456, 0.406 ],
-                         std  = [ 0.229, 0.224, 0.225 ]),
-    ])
-
-testTransform = transforms.Compose([
-    transforms.CenterCrop(224),
-    transforms.ToTensor(),
-    transforms.Normalize(mean = [ 0.485, 0.456, 0.406 ],
-                         std  = [ 0.229, 0.224, 0.225 ]),
-    ])
-
-trainData = dsets.ImageFolder('/mnt/data/train', transform)
-testData = dsets.ImageFolder('/mnt/data/test', testTransform)
-
-trainLoader = torch.utils.data.DataLoader(dataset=trainData, batch_size=BATCH_SIZE, shuffle=True)
-testLoader = torch.utils.data.DataLoader(dataset=testData, batch_size=BATCH_SIZE, shuffle=False)
-
 def simple_vgg_conv_block(in_list, out_list, k_list, p_list):
     layers = [ conv_layer(in_list[i], out_list[i], k_list[i], p_list[i]) for i in range(len(in_list)) ]
     return tnn.Sequential(*layers)
@@ -96,6 +70,32 @@ class VGG16(tnn.Module):
 
 # some train
 if "__main__" == __name__:
+    # ref: https://blog.csdn.net/batmanchen/article/details/109897788
+    transform = transforms.Compose([
+        transforms.RandomResizedCrop(224),
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomRotation(360),
+        transforms.RandomAffine(360),
+        transforms.ColorJitter(),
+        transforms.ToTensor(),
+        transforms.RandomErasing(p=0.8),
+        transforms.Normalize(mean = [ 0.485, 0.456, 0.406 ],
+                             std  = [ 0.229, 0.224, 0.225 ]),
+        ])
+
+    testTransform = transforms.Compose([
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize(mean = [ 0.485, 0.456, 0.406 ],
+                             std  = [ 0.229, 0.224, 0.225 ]),
+        ])
+
+    trainData = dsets.ImageFolder('~/data/train', transform)
+    testData = dsets.ImageFolder('~/data/test', testTransform)
+
+    trainLoader = torch.utils.data.DataLoader(dataset=trainData, batch_size=BATCH_SIZE, shuffle=True)
+    testLoader = torch.utils.data.DataLoader(dataset=testData, batch_size=BATCH_SIZE, shuffle=False)
+
           
     # use gpu1
     import os
